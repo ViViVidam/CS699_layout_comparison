@@ -65,7 +65,7 @@ var URL = require('url').URL;
 var fs_extra_1 = __importDefault(require("fs-extra")); // v 5.0.0
 var sanitize_filename_1 = __importDefault(require("sanitize-filename"));
 var playwright_1 = __importDefault(require("playwright"));
-var chromium = playwright_1.default.chromium, firefox = playwright_1.default.firefox;
+var chromium = playwright_1.default.chromium, firefox = playwright_1.default.firefox, devices = playwright_1.default.devices;
 var hasha_1 = __importDefault(require("hasha"));
 var path_1 = require("path");
 var Queue_1 = require("./Queue");
@@ -73,6 +73,7 @@ var adblocker_playwright_1 = require("@cliqz/adblocker-playwright");
 var uuidv1 = require('uuidv1');
 var config_json_1 = require("./config.json");
 var chalk_1 = __importDefault(require("chalk"));
+var iPhone = devices['iPhone 12'];
 var SubURLScanMode;
 (function (SubURLScanMode) {
     SubURLScanMode["FULL"] = "full";
@@ -1341,11 +1342,10 @@ var Crawler = /** @class */ (function () {
                         if (!this.useFirefox) return [3 /*break*/, 6];
                         _a = this;
                         return [4 /*yield*/, firefox.launchPersistentContext(this.userDataDir, {
-                                // userPrefs: !this.WebAssemblyEnabled  ?  {
-                                //     'javascript.options.wasm': 'false'
-                                // } : undefined,
-                                // devtools: true,
-                                // dumpio: false,//!PROD,
+                                deviceScaleFactor: iPhone.deviceScaleFactor,
+                                isMobile: iPhone.isMobile,
+                                viewport: iPhone.viewport,
+                                userAgent: iPhone.userAgent,
                                 headless: HEADLESS_BROWSER
                                 //viewport: { width: 1280, height: 720 }
                             })];
@@ -1356,10 +1356,13 @@ var Crawler = /** @class */ (function () {
                         _b = this;
                         return [4 /*yield*/, chromium.launchPersistentContext(this.userDataDir, {
                                 // userDataDir: ,
-                                args: !this.WebAssemblyEnabled ? ['--js-flags=--noexpose_wasm'] : undefined,
+                                args: !this.WebAssemblyEnabled ? ['--js-flags=--noexpose_wasm'] : ['--use-mobile-user-agent '],
                                 // args: ['--disable-setuid-sandbox', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage', `--js-flags=--dump-wasm-module-path=${MODULE_DUMP_PATH}`],
                                 // ignoreDefaultArgs: ['--disable-extensions'],
-                                // devtools: true,
+                                deviceScaleFactor: iPhone.deviceScaleFactor,
+                                isMobile: iPhone.isMobile,
+                                viewport: iPhone.viewport,
+                                userAgent: iPhone.userAgent,
                                 // dumpio: false,//!PROD,
                                 headless: HEADLESS_BROWSER
                                 //viewport: null

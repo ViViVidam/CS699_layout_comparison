@@ -26,7 +26,7 @@ import fse, {outputFile} from 'fs-extra'; // v 5.0.0
 import sanitize from "sanitize-filename";
 import {MySQLConnector} from './MySQLConnector';
 import playwright, { Browser, JSHandle, Page, BrowserType, LaunchOptions, BrowserContext } from 'playwright';
-const { chromium, firefox } = playwright;
+const { chromium, firefox, devices } = playwright;
 import hasha from 'hasha';
 import {
     join,
@@ -47,6 +47,8 @@ import {
 } from './config.json';
 import { type } from 'os';
 import chalk from 'chalk';
+
+const iPhone = devices['iPhone 12']
 
 enum SubURLScanMode {
     FULL = 'full',
@@ -942,11 +944,10 @@ export class Crawler {
             if(this.useFirefox){
                 this.browser = await firefox.launchPersistentContext(this.userDataDir,
                     {
-                        // userPrefs: !this.WebAssemblyEnabled  ?  {
-                        //     'javascript.options.wasm': 'false'
-                        // } : undefined,
-                        // devtools: true,
-                        // dumpio: false,//!PROD,
+                        deviceScaleFactor: iPhone.deviceScaleFactor,
+                        isMobile: iPhone.isMobile,
+                        viewport: iPhone.viewport,
+                        userAgent: iPhone.userAgent,
                         headless: HEADLESS_BROWSER
                         //viewport: { width: 1280, height: 720 }
                     }
@@ -956,10 +957,14 @@ export class Crawler {
                 this.browser = await chromium.launchPersistentContext(this.userDataDir,
                     {
                         // userDataDir: ,
-                        args: !this.WebAssemblyEnabled ? [ '--js-flags=--noexpose_wasm'] : undefined,
+                        args: !this.WebAssemblyEnabled ? ['--js-flags=--noexpose_wasm'] : ['--use-mobile-user-agent '],
+
                           // args: ['--disable-setuid-sandbox', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage', `--js-flags=--dump-wasm-module-path=${MODULE_DUMP_PATH}`],
                         // ignoreDefaultArgs: ['--disable-extensions'],
-                        // devtools: true,
+                        deviceScaleFactor: iPhone.deviceScaleFactor,
+                        isMobile: iPhone.isMobile,
+                        viewport: iPhone.viewport,
+                        userAgent: iPhone.userAgent,
                         // dumpio: false,//!PROD,
                         headless: HEADLESS_BROWSER
                         //viewport: null
