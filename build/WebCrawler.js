@@ -82,7 +82,7 @@ var SubURLScanMode;
 })(SubURLScanMode || (SubURLScanMode = {}));
 var SUBPAGE_PERCENTAGE_TO_VISIT = (process.env.SUBPAGE_PERCENTAGE_TO_VISIT != null) ? parseFloat(process.env.SUBPAGE_PERCENTAGE_TO_VISIT) : 0.25;
 var MAX_CRAWL_DEPTH_LEVEL = (process.env.MAX__CRAWL_DEPTH_LEVEL != null) ? parseInt(process.env.MAX__CRAWL_DEPTH_LEVEL) : config_json_1.max_crawl_depth_level;
-var HEADLESS_BROWSER = false;
+var HEADLESS_BROWSER = true;
 var TIME_TO_WAIT = (process.env.TIME_TO_WAIT != null) ? parseFloat(process.env.TIME_TO_WAIT) : config_json_1.time_to_wait_on_page;
 var SUBURL_SCAN_MODE;
 var suburl_scan_option = (_a = process.env.SUBURL_SCAN_MODE) !== null && _a !== void 0 ? _a : config_json_1.suburl_scan_mode;

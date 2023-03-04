@@ -57,7 +57,7 @@ enum SubURLScanMode {
 }
 const SUBPAGE_PERCENTAGE_TO_VISIT: number = (process.env.SUBPAGE_PERCENTAGE_TO_VISIT != null) ? parseFloat(process.env.SUBPAGE_PERCENTAGE_TO_VISIT) : 0.25;
 const MAX_CRAWL_DEPTH_LEVEL = (process.env.MAX__CRAWL_DEPTH_LEVEL != null) ? parseInt(process.env.MAX__CRAWL_DEPTH_LEVEL) : max_crawl_depth_level;
-const HEADLESS_BROWSER = false;
+const HEADLESS_BROWSER = true;
 const TIME_TO_WAIT: number = (process.env.TIME_TO_WAIT != null) ? parseFloat(process.env.TIME_TO_WAIT) : time_to_wait_on_page;
 let SUBURL_SCAN_MODE: SubURLScanMode;
 let suburl_scan_option = process.env.SUBURL_SCAN_MODE ?? suburl_scan_mode;

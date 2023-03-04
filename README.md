@@ -1,6 +1,6 @@
 # Web Layout Crawler #
 
-This project uses the Playwright library to crawl a specified webpage with Chrome and Firefox with WebAssembly enabled and disabled. The downloaded webpage files are downloaded to the folder `JSOutput`. Screenshots are saved to the `Screenshots` folder. 
+This project uses the Playwright library to crawl a specified webpage with Chrome and Firefox with WebAssembly enabled and disabled. The downloaded webpage files are downloaded to the folder `JSOutput`. Screenshots are saved to the `Screenshots` folder. The playwright will emulate as an android device.
 
 ## How to set up ###
 
