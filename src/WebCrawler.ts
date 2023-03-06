@@ -48,7 +48,7 @@ import {
 import { type } from 'os';
 import chalk from 'chalk';
 
-const iPhone = devices['iPhone 12']
+const mobileDev = devices["Galaxy S8"]
 
 enum SubURLScanMode {
     FULL = 'full',
@@ -354,90 +354,82 @@ export class Crawler {
         }
     }
     async getPage() {
-            let page: Page | null = null;
-            const browser = await this.getBrowser()
-            try{
+        let page: Page | null = null;
+        const browser = await this.getBrowser()
+        try {
+            page = await browser.newPage();
+            if (this.WebAssemblyEnabled) {
+                await page.addInitScript(preloadFile)
+            }
+        } catch (newPageError) {
+            // console.error('New Page Error:', newPageError);
+
+        }
+
+        if (page == null) {
+            try {
+                await this.startBrowser();
                 page = await browser.newPage();
-                if(this.WebAssemblyEnabled){
+                if (this.WebAssemblyEnabled) {
                     await page.addInitScript(preloadFile)
                 }
-            } catch(newPageError){
-                // console.error('New Page Error:', newPageError);
-                
+            } catch (startBrowserError) {
+                console.error(`Starting browser error`, startBrowserError);
+                throw startBrowserError;
+            }
+        }
+        page.on('frameattached', data => {
+            if (this.enteringScreening)
+                this.hasVideo = true;
+        });
+
+        await page.exposeFunction('saveWasmBuffer', async (stringBuffer: string) => {
+            const str2ab = function _str2ab(str: string) { // Convert a UTF-8 String to an ArrayBuffer
+                var buf = new ArrayBuffer(str.length); // 1 byte for each char
+                var bufView = new Uint8Array(buf);
+
+                for (var i = 0, strLen = str.length; i < strLen; i++) {
+                    bufView[i] = str.charCodeAt(i);
+                }
+                return Buffer.from(buf);
+            }
+            this.containsWebAssembly = true;
+            if (this.currentJob) {
+                this.pagesWithWebAssembly.add(this.currentJob.url);
             }
 
-            if(page == null){
+            const wasmBuffer = str2ab(stringBuffer);
+            const bufferHashString = await this.hashBuffer(wasmBuffer)
+            await fse.outputFile(_resolve(this.finalDomainOutputPath, `${bufferHashString}.wasm`), wasmBuffer);
+        });
+        if (this.WebAssemblyEnabled) {
+            page.on('worker', async worker => {
+                // console.log('Worker created: ' + worker.url())
                 try {
-                    await this.startBrowser();
-                    page = await browser.newPage();
-                    if(this.WebAssemblyEnabled){
-                        await page.addInitScript(preloadFile)
-                    }
-                } catch(startBrowserError){
-                    console.error(`Starting browser error`, startBrowserError);
-                    throw startBrowserError;
+                    await worker.evaluate(preloadFile)
+                    await worker.evaluate(() => {
+                        setTimeout(() => {
+                            console.log(self);
+                        }, 1000)
+                    })
+                    const currentWorkerWebAssembly: JSHandle<WebAssemblyInstrumentation> = await worker.evaluateHandle(() => {
+                        return self.WebAssemblyCallsFound;
+                    })
+                    this.webAssemblyWorkers.push(currentWorkerWebAssembly);
+                } catch (err) {
+                    console.error('Worker Eval', err)
                 }
-            }
-            page.on('frameattached', data =>{
-                if(this.enteringScreening)
-                    this.hasVideo = true;
             });
+        }
 
-            await page.exposeFunction('saveWasmBuffer', async (stringBuffer: string) => {
-                const str2ab = function _str2ab(str: string) { // Convert a UTF-8 String to an ArrayBuffer
-                    var buf = new ArrayBuffer(str.length); // 1 byte for each char
-                    var bufView = new Uint8Array(buf);
-            
-                    for (var i=0, strLen=str.length; i < strLen; i++) {
-                      bufView[i] = str.charCodeAt(i);
-                    }
-                    return Buffer.from(buf);
-                }
-                this.containsWebAssembly = true;
-                if(this.currentJob){
-                    this.pagesWithWebAssembly.add(this.currentJob.url);
-                }
-                
-                const wasmBuffer = str2ab(stringBuffer);
-                const bufferHashString = await this.hashBuffer(wasmBuffer)
-                await fse.outputFile(_resolve( this.finalDomainOutputPath,`${bufferHashString}.wasm`), wasmBuffer);
-            });
-            
-            // await page.setViewportSize({
-            //     width: 600,//1920,
-            //     height: 800//1080
-            // });
-            await page.setViewportSize({
-                width: 640,
-                height: 480,
-              });
-            
-              if(this.WebAssemblyEnabled){
-                page.on('worker', async worker => {
-                    // console.log('Worker created: ' + worker.url())
-                    try {
-                        await worker.evaluate(preloadFile)
-                        await worker.evaluate(() => {
-                            setTimeout(() => {
-                                console.log(self);
-                            }, 1000)
-                        })
-                        const currentWorkerWebAssembly: JSHandle<WebAssemblyInstrumentation> = await worker.evaluateHandle(() => {
-                            return self.WebAssemblyCallsFound;
-                        })
-                        this.webAssemblyWorkers.push(currentWorkerWebAssembly);
-                    } catch (err) {
-                        console.error('Worker Eval', err)
-                    }
-                });
-              }
+        this.currentBase64Index = 0;
+        const shouldDownloadAllFiles = this.shouldDownloadAllFiles;
+        page.on('response', shouldDownloadAllFiles ? this.handleFileResponse : this.handleWebAssemblyResponseOnly);
+        page.setDefaultNavigationTimeout(0)
+        let blocker = await PlaywrightBlocker.fromPrebuiltAdsAndTracking(fetch);
+        blocker.enableBlockingInPage(page);
 
-            this.currentBase64Index = 0;
-            const shouldDownloadAllFiles = this.shouldDownloadAllFiles;
-            page.on('response', shouldDownloadAllFiles ? this.handleFileResponse : this.handleWebAssemblyResponseOnly);
-            page.setDefaultNavigationTimeout(0)
-
-            return page;
+        return page;
     }
 
     async makeOutputDirectories(){
@@ -787,11 +779,7 @@ export class Crawler {
             page.on("crash", async (error: any) => {
                 reject(error)
             });
-            if(page){
-                PlaywrightBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
-                    blocker.enableBlockingInPage(page);
-                });
-            }
+
 
             timeout = setTimeout(() => {
                 console.log('EXECUTE TIMEOUT');
@@ -812,9 +800,7 @@ export class Crawler {
                     finally {
 
                     }
-
                 }
-
 
                 // await this.scrollToTop(page);
                 const instrumentationRecords = await this.collectInstrumentationRecordsFromPage(page);
@@ -944,10 +930,10 @@ export class Crawler {
             if(this.useFirefox){
                 this.browser = await firefox.launchPersistentContext(this.userDataDir,
                     {
-                        deviceScaleFactor: iPhone.deviceScaleFactor,
-                        isMobile: iPhone.isMobile,
-                        viewport: iPhone.viewport,
-                        userAgent: iPhone.userAgent,
+                        deviceScaleFactor: mobileDev.deviceScaleFactor,
+                        isMobile: mobileDev.isMobile,
+                        viewport: mobileDev.viewport,
+                        userAgent: mobileDev.userAgent,
                         headless: HEADLESS_BROWSER
                         //viewport: { width: 1280, height: 720 }
                     }
@@ -961,10 +947,10 @@ export class Crawler {
 
                           // args: ['--disable-setuid-sandbox', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage', `--js-flags=--dump-wasm-module-path=${MODULE_DUMP_PATH}`],
                         // ignoreDefaultArgs: ['--disable-extensions'],
-                        deviceScaleFactor: iPhone.deviceScaleFactor,
-                        isMobile: iPhone.isMobile,
-                        viewport: iPhone.viewport,
-                        userAgent: iPhone.userAgent,
+                        deviceScaleFactor: mobileDev.deviceScaleFactor,
+                        isMobile: mobileDev.isMobile,
+                        viewport: mobileDev.viewport,
+                        userAgent: mobileDev.userAgent,
                         // dumpio: false,//!PROD,
                         headless: HEADLESS_BROWSER
                         //viewport: null
