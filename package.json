@@ -24,6 +24,8 @@
     "mv": "^2.1.1",
     "mysql": "^2.18.1",
     "node-fetch": "^2.6.0",
+    "pixelmatch": "^5.3.0",
+    "pngjs": "^7.0.0",
     "sanitize-filename": "^1.6.3",
     "save": "^2.4.0",
     "uuid": "^3.4.0",
