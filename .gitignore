@@ -107,6 +107,9 @@ dist
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
+# Test images in scripts/
+scripts/tests/*
+
 JSOutput/*
 Screenshots/*
 Reports/*

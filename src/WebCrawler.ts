@@ -48,6 +48,8 @@ import {
 import { type } from 'os';
 import chalk from 'chalk';
 
+import { pixelMatchDiff } from './comparison/ScreenshotComparison';
+
 const mobileDev = devices["Galaxy S8"]
 
 enum SubURLScanMode {
@@ -990,6 +992,26 @@ export class Crawler {
                 resolve();
             }, seconds * 1000)
         })
+    }
+
+    async pixelmatch() {
+        const chrome = '\\Chrome';
+        const firefox = '\\Firefox';
+        const disable = '\\WebAssembly_Disabled';
+        const enable = '\\WebAssembly_Enabled';
+        const screens = '\\screenshot.jpeg';
+        let chr_en = this.screenshotOutputPath+chrome+enable+screens;
+        let chr_dis = this.screenshotOutputPath+chrome+disable+screens;
+        let fir_en = this.screenshotOutputPath+firefox+enable+screens;
+        let fir_dis = this.screenshotOutputPath+firefox+disable+screens;
+        let diff_path = this.screenshotOutputPath;
+        let results = [];
+        results.push(this.domainReal);
+        results.push(await pixelMatchDiff(chr_en,chr_dis,diff_path+"\\chren_chrdis.jpeg"));
+        results.push(await pixelMatchDiff(chr_en,fir_en,diff_path+"\\chren_firen.jpeg"));
+        results.push(await pixelMatchDiff(fir_en,fir_dis,diff_path+"\\firen_firdis.jpeg"));
+        results.push(await pixelMatchDiff(fir_dis,chr_dis,diff_path+"\\firen_chrdis.jpeg"));
+        return results;
     }
 
 }
