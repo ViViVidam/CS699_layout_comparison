@@ -73,7 +73,7 @@ var adblocker_playwright_1 = require("@cliqz/adblocker-playwright");
 var uuidv1 = require('uuidv1');
 var config_json_1 = require("./config.json");
 var chalk_1 = __importDefault(require("chalk"));
-var iPhone = devices['iPhone 12'];
+var mobileDev = devices["Galaxy S8"];
 var SubURLScanMode;
 (function (SubURLScanMode) {
     SubURLScanMode["FULL"] = "full";
@@ -120,7 +120,7 @@ var Crawler = /** @class */ (function () {
         this.pagesWithVideo = new Set();
         this.insertedURLs = new Set();
         this.currentBase64Index = 0;
-        this.alwaysScreenshot = true;
+        this.alwaysScreenshot = false;
         this.screenshotSubPath = "";
         this.capturedRequests = new Map();
         this.capturedWebSocketRequests = new Map();
@@ -394,7 +394,7 @@ var Crawler = /** @class */ (function () {
     };
     Crawler.prototype.getPage = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var page, browser, newPageError_1, startBrowserError_1, shouldDownloadAllFiles;
+            var page, browser, newPageError_1, startBrowserError_1, shouldDownloadAllFiles, blocker;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -474,20 +474,6 @@ var Crawler = /** @class */ (function () {
                             }); })];
                     case 15:
                         _a.sent();
-                        // await page.setViewportSize({
-                        //     width: 600,//1920,
-                        //     height: 800//1080
-                        // });
-                        return [4 /*yield*/, page.setViewportSize({
-                                width: 640,
-                                height: 480,
-                            })];
-                    case 16:
-                        // await page.setViewportSize({
-                        //     width: 600,//1920,
-                        //     height: 800//1080
-                        // });
-                        _a.sent();
                         if (this.WebAssemblyEnabled) {
                             page.on('worker', function (worker) { return __awaiter(_this, void 0, void 0, function () {
                                 var currentWorkerWebAssembly, err_1;
@@ -525,6 +511,11 @@ var Crawler = /** @class */ (function () {
                         shouldDownloadAllFiles = this.shouldDownloadAllFiles;
                         page.on('response', shouldDownloadAllFiles ? this.handleFileResponse : this.handleWebAssemblyResponseOnly);
                         page.setDefaultNavigationTimeout(0);
+                        return [4 /*yield*/, adblocker_playwright_1.PlaywrightBlocker.fromPrebuiltAdsAndTracking(fetch)];
+                    case 16:
+                        blocker = _a.sent();
+                        blocker.enableBlockingInPage(page);
+                        //await page.setViewportSize(mobileDev.viewport);
                         return [2 /*return*/, page];
                 }
             });
@@ -732,17 +723,14 @@ var Crawler = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        //First attempt full-page screenshot
-                        page.screenshot();
                         screenshotBuffer = null;
                         imageType = 'jpeg';
                         _c.label = 1;
                     case 1:
                         _c.trys.push([1, 3, , 4]);
                         this.enteringScreening = true;
-                        return [4 /*yield*/, page.screenshot({
+                        return [4 /*yield*/, page.locator('body').screenshot({
                                 type: imageType,
-                                fullPage: true,
                                 animations: "disabled",
                                 scale: "css"
                             })];
@@ -1089,18 +1077,13 @@ var Crawler = /** @class */ (function () {
                                 return [2 /*return*/];
                             });
                         }); });
-                        if (page) {
-                            adblocker_playwright_1.PlaywrightBlocker.fromPrebuiltAdsAndTracking(fetch).then(function (blocker) {
-                                blocker.enableBlockingInPage(page);
-                            });
-                        }
                         timeout = setTimeout(function () {
                             console.log('EXECUTE TIMEOUT');
                             resolve(crawlResults);
                         }, (TIME_TO_WAIT * 5) * 1000);
                         _a.label = 5;
                     case 5:
-                        _a.trys.push([5, 23, , 24]);
+                        _a.trys.push([5, 24, , 25]);
                         this.hasVideo = false;
                         return [4 /*yield*/, page.goto(pageURL, {
                                 waitUntil: 'load'
@@ -1111,26 +1094,31 @@ var Crawler = /** @class */ (function () {
                         return [4 /*yield*/, page.waitForTimeout(TIME_TO_WAIT * 1000)];
                     case 7:
                         _a.sent();
-                        if (!this.currentJob) return [3 /*break*/, 11];
-                        _a.label = 8;
+                        return [4 /*yield*/, page.evaluate(function () {
+                                document.body.style.transform = 'scale(1.0)';
+                            })];
                     case 8:
-                        _a.trys.push([8, , 10, 11]);
-                        return [4 /*yield*/, this.handleSubURLScan(page, this.currentJob)];
-                    case 9:
                         _a.sent();
-                        return [3 /*break*/, 11];
-                    case 10: return [7 /*endfinally*/];
-                    case 11: return [4 /*yield*/, this.collectInstrumentationRecordsFromPage(page)];
-                    case 12:
+                        if (!this.currentJob) return [3 /*break*/, 12];
+                        _a.label = 9;
+                    case 9:
+                        _a.trys.push([9, , 11, 12]);
+                        return [4 /*yield*/, this.handleSubURLScan(page, this.currentJob)];
+                    case 10:
+                        _a.sent();
+                        return [3 /*break*/, 12];
+                    case 11: return [7 /*endfinally*/];
+                    case 12: return [4 /*yield*/, this.collectInstrumentationRecordsFromPage(page)];
+                    case 13:
                         instrumentationRecords = _a.sent();
                         clearTimeout(timeout);
-                        if (!this.alwaysScreenshot) return [3 /*break*/, 14];
+                        if (!this.alwaysScreenshot) return [3 /*break*/, 15];
                         return [4 /*yield*/, this.takeScreenshot(page)];
-                    case 13:
-                        _a.sent();
-                        _a.label = 14;
                     case 14:
-                        if (!instrumentationRecords.altered) return [3 /*break*/, 21];
+                        _a.sent();
+                        _a.label = 15;
+                    case 15:
+                        if (!instrumentationRecords.altered) return [3 /*break*/, 22];
                         console.log('*'.repeat(10) + " Found a WebAssembly module! " + '*'.repeat(10));
                         requestsForPage = this.capturedRequests.get(pageURL);
                         crawlResults = {
@@ -1142,35 +1130,35 @@ var Crawler = /** @class */ (function () {
                         };
                         this.containsWebAssembly = true;
                         this.pagesWithWebAssembly.add(pageURL);
-                        _a.label = 15;
-                    case 15:
-                        _a.trys.push([15, 20, , 21]);
-                        if (!!this.alwaysScreenshot) return [3 /*break*/, 17];
-                        return [4 /*yield*/, this.takeScreenshot(page)];
+                        _a.label = 16;
                     case 16:
-                        _a.sent();
-                        _a.label = 17;
+                        _a.trys.push([16, 21, , 22]);
+                        if (!!this.alwaysScreenshot) return [3 /*break*/, 18];
+                        return [4 /*yield*/, this.takeScreenshot(page)];
                     case 17:
-                        if (!!this.insertedURLs.has(pageURL)) return [3 /*break*/, 19];
-                        return [4 /*yield*/, this.insertInstantiateIntoDatabase("" + pageURL, this.domain, instrumentationRecords, currentJob.parent)];
-                    case 18:
                         _a.sent();
-                        _a.label = 19;
-                    case 19: return [3 /*break*/, 21];
-                    case 20:
+                        _a.label = 18;
+                    case 18:
+                        if (!!this.insertedURLs.has(pageURL)) return [3 /*break*/, 20];
+                        return [4 /*yield*/, this.insertInstantiateIntoDatabase("" + pageURL, this.domain, instrumentationRecords, currentJob.parent)];
+                    case 19:
+                        _a.sent();
+                        _a.label = 20;
+                    case 20: return [3 /*break*/, 22];
+                    case 21:
                         takeScreenshotError_1 = _a.sent();
                         console.log(takeScreenshotError_1);
-                        return [3 /*break*/, 21];
-                    case 21: return [4 /*yield*/, this.closePage(page)];
-                    case 22:
-                        _a.sent();
-                        return [3 /*break*/, 24];
+                        return [3 /*break*/, 22];
+                    case 22: return [4 /*yield*/, this.closePage(page)];
                     case 23:
+                        _a.sent();
+                        return [3 /*break*/, 25];
+                    case 24:
                         err_2 = _a.sent();
                         clearTimeout(timeout);
                         reject(err_2);
                         return [2 /*return*/];
-                    case 24:
+                    case 25:
                         resolve(crawlResults);
                         return [2 /*return*/];
                 }
@@ -1342,10 +1330,10 @@ var Crawler = /** @class */ (function () {
                         if (!this.useFirefox) return [3 /*break*/, 6];
                         _a = this;
                         return [4 /*yield*/, firefox.launchPersistentContext(this.userDataDir, {
-                                deviceScaleFactor: iPhone.deviceScaleFactor,
-                                isMobile: iPhone.isMobile,
-                                viewport: iPhone.viewport,
-                                userAgent: iPhone.userAgent,
+                                deviceScaleFactor: mobileDev.deviceScaleFactor,
+                                isMobile: mobileDev.isMobile,
+                                //viewport: mobileDev.viewport,
+                                userAgent: mobileDev.userAgent,
                                 headless: HEADLESS_BROWSER
                                 //viewport: { width: 1280, height: 720 }
                             })];
@@ -1359,10 +1347,10 @@ var Crawler = /** @class */ (function () {
                                 args: !this.WebAssemblyEnabled ? ['--js-flags=--noexpose_wasm'] : ['--use-mobile-user-agent '],
                                 // args: ['--disable-setuid-sandbox', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage', `--js-flags=--dump-wasm-module-path=${MODULE_DUMP_PATH}`],
                                 // ignoreDefaultArgs: ['--disable-extensions'],
-                                deviceScaleFactor: iPhone.deviceScaleFactor,
-                                isMobile: iPhone.isMobile,
-                                viewport: iPhone.viewport,
-                                userAgent: iPhone.userAgent,
+                                deviceScaleFactor: mobileDev.deviceScaleFactor,
+                                isMobile: mobileDev.isMobile,
+                                //viewport: mobileDev.viewport,
+                                userAgent: mobileDev.userAgent,
                                 // dumpio: false,//!PROD,
                                 headless: HEADLESS_BROWSER
                                 //viewport: null

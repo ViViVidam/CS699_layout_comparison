@@ -428,7 +428,7 @@ export class Crawler {
         page.setDefaultNavigationTimeout(0)
         let blocker = await PlaywrightBlocker.fromPrebuiltAdsAndTracking(fetch);
         blocker.enableBlockingInPage(page);
-
+        //await page.setViewportSize(mobileDev.viewport);
         return page;
     }
 
@@ -533,14 +533,12 @@ export class Crawler {
     }
     async takeScreenshot(page: Page){
         //First attempt full-page screenshot
-        page.screenshot()
         let screenshotBuffer: Buffer | null = null;
         const imageType = 'jpeg';
         try{
             this.enteringScreening = true;
-            screenshotBuffer = await page.screenshot({
+            screenshotBuffer = await page.locator('body').screenshot({
                 type: imageType,
-                fullPage: true,
                 animations: "disabled",
                 scale: "css"
             });
@@ -786,6 +784,7 @@ export class Crawler {
                 resolve(crawlResults);
             }, (TIME_TO_WAIT * 5) * 1000);
 
+
             try {
                 this.hasVideo = false;
                 await page.goto(pageURL, {
@@ -793,6 +792,9 @@ export class Crawler {
                 });
                 console.log("loading");
                 await page.waitForTimeout(TIME_TO_WAIT * 1000);
+                await page.evaluate(()=>{
+                    document.body.style.transform = 'scale(1.0)'
+                });
                 if(this.currentJob){
                     try{
                         await this.handleSubURLScan(page, this.currentJob)
@@ -932,7 +934,7 @@ export class Crawler {
                     {
                         deviceScaleFactor: mobileDev.deviceScaleFactor,
                         isMobile: mobileDev.isMobile,
-                        viewport: mobileDev.viewport,
+                        //viewport: mobileDev.viewport,
                         userAgent: mobileDev.userAgent,
                         headless: HEADLESS_BROWSER
                         //viewport: { width: 1280, height: 720 }
@@ -949,7 +951,7 @@ export class Crawler {
                         // ignoreDefaultArgs: ['--disable-extensions'],
                         deviceScaleFactor: mobileDev.deviceScaleFactor,
                         isMobile: mobileDev.isMobile,
-                        viewport: mobileDev.viewport,
+                        //viewport: mobileDev.viewport,
                         userAgent: mobileDev.userAgent,
                         // dumpio: false,//!PROD,
                         headless: HEADLESS_BROWSER
