@@ -9,10 +9,12 @@ import {
     writeFileSync
 } from 'fs';
 import mv from 'mv';
+import {optChrome,optFireFox} from "./mobileBrowserSettings";
 import {makeChromeProfile, makeFirefoxProfileWithWebAssemblyDisabled, makeFirefoxProfileWithWebAssemblyEnabled} from './CommonUtilities';
 import {
     promisify
 } from 'util';
+//import wdio = require("webdriverio");
 const readdir = promisify(_readdir);
 const mkdir = promisify(_mkdir);
 const stat = promisify(_stat);
@@ -45,10 +47,12 @@ import {
     time_to_wait_on_page,
     suburl_scan_mode
 } from './config.json';
-import { type } from 'os';
+const { exec } = require('child_process');
 import chalk from 'chalk';
-
+import {MobileDriver
+} from "./mobileDriver";
 import { pixelMatchDiff } from './comparison/ScreenshotComparison';
+
 
 const mobileDev = devices["Galaxy S8"]
 
@@ -150,9 +154,11 @@ export class Crawler {
     insertedURLs: Set<string> = new Set();
     shouldDownloadAllFiles: boolean;
     currentBase64Index: number = 0;
-    alwaysScreenshot: boolean = false;
+    alwaysScreenshot: boolean = true;
     screenshotSubPath:string = "";
+    mobileDriver: MobileDriver;
     constructor(databaseConnector: MySQLConnector, domain: string, argv: any) {
+        this.mobileDriver = new MobileDriver();
         this.capturedRequests = new Map();
         this.capturedWebSocketRequests = new Map();
         this.browser = null;
@@ -163,6 +169,7 @@ export class Crawler {
         this.shouldDownloadAllFiles = argv.full;
         this.handleFileResponse = this.handleFileResponse.bind(this);
         this.handleWebAssemblyResponseOnly = this.handleWebAssemblyResponseOnly.bind(this);
+        exec("node helloworld.js")
     }
 
     setLaunchOptions(browser: string,disableWebAssembly=false){
@@ -534,14 +541,25 @@ export class Crawler {
         }).catch()
     }
     async takeScreenshot(page: Page){
-        //First attempt full-page screenshot
-        let screenshotBuffer: Buffer | null = null;
+        if(this.currentJob?.url) {
+            const imageType = ".pdf";
+
+            const screenshotPath = this.sanitizeURLForFileSystem(this.currentJob?.url, this.screenshotOutputPath) + '.' + imageType;
+            let parentDir = dirname(screenshotPath)
+            if (this.useFirefox) {
+                await this.mobileDriver.takeScreenShot(this.currentJob?.url, "FireFox", parentDir );
+            } else {
+                await this.mobileDriver.takeScreenShot(this.currentJob?.url, "Chrome", parentDir);
+            }
+        }
+        /*let screenshotBuffer: Buffer | null = null;
         const imageType = 'jpeg';
         try{
             this.enteringScreening = true;
-            screenshotBuffer = await page.locator('body').screenshot({
+            screenshotBuffer = await page.screenshot({
                 type: imageType,
                 animations: "disabled",
+                fullPage: true,
                 scale: "css"
             });
             this.enteringScreening = false;
@@ -573,7 +591,7 @@ export class Crawler {
             await fse.outputFile(parentDir+"/screenshot."+imageType, screenshotBuffer);
             //console.log(this.hasVideo);
             await fse.outputFile(parentDir +"/screenshot.txt",""+this.hasVideo).then(()=>(this.hasVideo = false));
-        }
+        }*/
 
     }
     
@@ -936,12 +954,13 @@ export class Crawler {
                     {
                         deviceScaleFactor: mobileDev.deviceScaleFactor,
                         isMobile: mobileDev.isMobile,
-                        //viewport: mobileDev.viewport,
+                        viewport: mobileDev.viewport,
                         userAgent: mobileDev.userAgent,
                         headless: HEADLESS_BROWSER
                         //viewport: { width: 1280, height: 720 }
                     }
                 );
+                //this.mobileDriver = await wdio.remote(optFireFox);
     
             } else {
                 this.browser = await chromium.launchPersistentContext(this.userDataDir,
@@ -953,13 +972,14 @@ export class Crawler {
                         // ignoreDefaultArgs: ['--disable-extensions'],
                         deviceScaleFactor: mobileDev.deviceScaleFactor,
                         isMobile: mobileDev.isMobile,
-                        //viewport: mobileDev.viewport,
+                        viewport: mobileDev.viewport,
                         userAgent: mobileDev.userAgent,
                         // dumpio: false,//!PROD,
                         headless: HEADLESS_BROWSER
                         //viewport: null
                     }
                 );
+                //this.mobileDriver = await wdio.remote(optChrome);
             }
         } catch(launchError){
             console.error('Launch Error', launchError);

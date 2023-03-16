@@ -17,6 +17,7 @@
   "dependencies": {
     "@cliqz/adblocker-playwright": "^1.25.2",
     "@types/uuid": "^8.0.0",
+    "appium": "^1.22.3",
     "chalk": "^4.1.0",
     "fs-extra": "^8.1.0",
     "hasha": "^5.2.0",
@@ -31,6 +32,7 @@
     "save": "^2.4.0",
     "uuid": "^3.4.0",
     "uuidv1": "^1.6.14",
+    "webdriverio": "^8.6.2",
     "yargs": "^12.0.5"
   },
   "devDependencies": {

@@ -1,4 +1,5 @@
-
+#Android package
+app/*
 # Logs
 logs
 *.log
