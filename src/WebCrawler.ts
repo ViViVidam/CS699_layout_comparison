@@ -23,7 +23,7 @@ const exists = promisify(_exists);
 const {
     URL
 } = require('url');
-
+//const wdio = require('webdriverio');
 import fse, {outputFile} from 'fs-extra'; // v 5.0.0
 import sanitize from "sanitize-filename";
 import {MySQLConnector} from './MySQLConnector';
@@ -411,25 +411,6 @@ export class Crawler {
             const bufferHashString = await this.hashBuffer(wasmBuffer)
             await fse.outputFile(_resolve(this.finalDomainOutputPath, `${bufferHashString}.wasm`), wasmBuffer);
         });
-        if (this.WebAssemblyEnabled) {
-            page.on('worker', async worker => {
-                // console.log('Worker created: ' + worker.url())
-                try {
-                    await worker.evaluate(preloadFile)
-                    await worker.evaluate(() => {
-                        setTimeout(() => {
-                            console.log(self);
-                        }, 1000)
-                    })
-                    const currentWorkerWebAssembly: JSHandle<WebAssemblyInstrumentation> = await worker.evaluateHandle(() => {
-                        return self.WebAssemblyCallsFound;
-                    })
-                    this.webAssemblyWorkers.push(currentWorkerWebAssembly);
-                } catch (err) {
-                    console.error('Worker Eval', err)
-                }
-            });
-        }
 
         this.currentBase64Index = 0;
         const shouldDownloadAllFiles = this.shouldDownloadAllFiles;
@@ -456,7 +437,8 @@ export class Crawler {
 
     async scanPages(browser: string) {
         this.setLaunchOptions(browser, false);
-        await this.setup();
+        await this.setup()
+        await this.mobileDriver.setWidthAndHeight();
         console.log(this.pagesWithWebAssembly);
         if(this.pagesWithWebAssembly.size > 0){
             for(const url of this.pagesWithWebAssembly){
@@ -543,7 +525,6 @@ export class Crawler {
     async takeScreenshot(page: Page){
         if(this.currentJob?.url) {
             const imageType = ".pdf";
-
             const screenshotPath = this.sanitizeURLForFileSystem(this.currentJob?.url, this.screenshotOutputPath) + '.' + imageType;
             let parentDir = dirname(screenshotPath)
             if (this.useFirefox) {
@@ -783,6 +764,7 @@ export class Crawler {
 
         console.log('Scanning ', pageURL, currentDepth)
 
+
         return new Promise(async (resolve, reject) => {
             let crawlResults: CrawlResults = {containsWebAssembly: false};
             let page: Page;
@@ -823,6 +805,8 @@ export class Crawler {
 
                     }
                 }
+
+                console.log(3)
 
                 // await this.scrollToTop(page);
                 const instrumentationRecords = await this.collectInstrumentationRecordsFromPage(page);

@@ -15,9 +15,10 @@ This project uses the Playwright library to crawl a specified webpage with Chrom
 3. Run `npm update` to update all the packages
 4. Run `npm run build`
 5. Download Android Studio from the website, installed it with virtual devices support.
-6. create a virtual device using device manager in Android device
+6. create a virtual device using device manager in Android device, and installing firefox on your virtual device.
 7. setting the environment variable to get adb work, type `adb` to check if it works.
 8. setting environment variable ANDROID_HOME to where you installed your Android Studio
+9. Download Firefox Android apk and put it in under app/ folder and rename it to `firefox.com.apk`, you can set the route your self by modifying the path in `src/mobileBrowserSettings.ts`
 
 ### Usage
 1. Run the virtual devices through Android Studio Device Manager or through terminal
@@ -28,4 +29,4 @@ This project uses the Playwright library to crawl a specified webpage with Chrom
 6. To generate visual analysis report, run `python scripts/ScreenshotAnalysis.py`
 
 ### TroubleShooting
-1. If in the emulator the device open the browser but never goto the url, shut down appium terminal, and run `adb uninstall io.appium.uiautomator2.server` and `adb uninstall io.appium.uiautomator2.server.test`, then relaunch appium
+1. If in the emulator device open the browser but never goto the url, shut down appium terminal, and run `adb uninstall io.appium.uiautomator2.server` and `adb uninstall io.appium.uiautomator2.server.test`, then relaunch appium

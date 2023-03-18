@@ -53,6 +53,7 @@ async function crawlSite(urlToScan: string, database: MySQLConnector){
         pageURL = "http://" + pageURL;
     }
     const crawler = new Crawler(database, pageURL, argv);
+
     for(const browser of ['chrome','firefox']){
         console.log(`Scanning with ${browser}: WebAssembly Enabled`)
         await crawler.scanPages(browser);
