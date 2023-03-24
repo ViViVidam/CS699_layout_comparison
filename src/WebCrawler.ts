@@ -154,7 +154,7 @@ export class Crawler {
     insertedURLs: Set<string> = new Set();
     shouldDownloadAllFiles: boolean;
     currentBase64Index: number = 0;
-    alwaysScreenshot: boolean = true;
+    alwaysScreenshot: boolean = false;
     screenshotSubPath:string = "";
     mobileDriver: MobileDriver;
     constructor(databaseConnector: MySQLConnector, domain: string, argv: any) {
