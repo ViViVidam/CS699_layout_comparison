@@ -49,19 +49,25 @@ export class MobileDriver{
             console.log(browserName+"  "+this.browserNames[this.browserIndex]);
             await this.driver.url(url);
             await this.driver.pause(3 * 1000);
-            let prevImg = await this.driver.takeScreenshot();
-            let presentImg;
+            let prevScrollY = await this.driver.execute(() => {return window.scrollY});
+            let newScrollY;
             let endOfPage = false;
             let counter = 0;
+            await this.driver.saveScreenshot(savePath + "/screenshot" + counter + ".png");
+            counter+=1;
+
             while(!endOfPage)
             {
                 await this.driver.touchScroll(Math.floor(10),Math.floor(this.height/3));
                 await this.driver.pause(1.5 * 1000);
-                presentImg = await this.driver.takeScreenshot();
-                if(prevImg === presentImg){
+                newScrollY = await this.driver.execute(() => {return window.scrollY});
+                console.log("new:"+newScrollY);
+                if (newScrollY == prevScrollY) {
                     endOfPage = true;
+                    break;
+                }else{
+                    prevScrollY = newScrollY;
                 }
-                prevImg = presentImg;
                 await this.driver.pause(1 * 1000);
                 await this.driver.saveScreenshot(savePath + "/screenshot" + counter + ".png");
                 counter+=1;
