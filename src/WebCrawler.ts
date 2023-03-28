@@ -9,7 +9,6 @@ import {
     writeFileSync
 } from 'fs';
 import mv from 'mv';
-import {optChrome,optFireFox} from "./mobileBrowserSettings";
 import {makeChromeProfile, makeFirefoxProfileWithWebAssemblyDisabled, makeFirefoxProfileWithWebAssemblyEnabled} from './CommonUtilities';
 import {
     promisify
@@ -438,7 +437,6 @@ export class Crawler {
     async scanPages(browser: string) {
         this.setLaunchOptions(browser, false);
         await this.setup()
-        await this.mobileDriver.setWidthAndHeight();
         console.log(this.pagesWithWebAssembly);
         if(this.pagesWithWebAssembly.size > 0){
             for(const url of this.pagesWithWebAssembly){
@@ -528,9 +526,9 @@ export class Crawler {
             const screenshotPath = this.sanitizeURLForFileSystem(this.currentJob?.url, this.screenshotOutputPath) + '.' + imageType;
             let parentDir = dirname(screenshotPath)
             if (this.useFirefox) {
-                await this.mobileDriver.takeScreenShot(this.currentJob?.url, "FireFox", parentDir );
+                await this.mobileDriver.takeScreenShot(this.currentJob?.url, "FireFox", parentDir,this.WebAssemblyEnabled);
             } else {
-                await this.mobileDriver.takeScreenShot(this.currentJob?.url, "Chrome", parentDir);
+                await this.mobileDriver.takeScreenShot(this.currentJob?.url, "Chrome", parentDir,this.WebAssemblyEnabled);
             }
         }
         /*let screenshotBuffer: Buffer | null = null;
