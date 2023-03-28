@@ -15,12 +15,12 @@ This project uses the Playwright library to crawl a specified webpage with Chrom
 3. Run `npm update` to update all the packages
 4. Run `npm run build`
 5. Download Android Studio from the website, installed it with virtual devices support.
-6. create a virtual device using device manager in Android device, and installing firefox on your virtual device.
-7. setting the environment variable to get adb work, type `adb` to check if it works.
-8. setting environment variable `ANDROID_HOME` to where you installed your Android Studio, `JAVA_HOME` to your jdk
+6. Create a virtual device using device manager in Android device, and installing firefox on your virtual device.
+7. Setting the environment variable to get adb work, type `adb` to check if it works.
+8. Setting environment variable `ANDROID_HOME` to where you installed your Android Studio, `JAVA_HOME` to your jdk
 9. `npm install -g appium@next`, this will install appium v2.x
 10. Run `appium driver install uiautomator2`, `appium driver install chromium`, `appium driver install gecko`, this will get you the required driver
-11. download geckodriver from [geckodriver download website](https://github.com/mozilla/geckodriver/releases), extra the downloaded file and at the path to your environment.
+11. Download geckodriver from [geckodriver download website](https://github.com/mozilla/geckodriver/releases), extra the downloaded file and add the path to your environment.
 
 ### Usage
 1. Run the virtual devices through Android Studio Device Manager or through terminal
