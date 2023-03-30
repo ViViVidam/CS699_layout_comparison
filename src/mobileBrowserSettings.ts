@@ -14,6 +14,9 @@ export function makeSetting(browserName:string,enablewasm:boolean):any {
                     , "prefs": {
                         "javascript.options.wasm": enablewasm
                         , "javascript.options.wasm_caching": false
+                        , "layout.css.devPixelsPerPx" : "1.0"
+                        , "browser.viewport.defaultZoom" : 1
+                        , "browser.viewport.desktopWidth" : 1080
                     }
                 }
             }
