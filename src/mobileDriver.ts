@@ -14,8 +14,8 @@ export class MobileDriver{
     }
     async scrollView(){
         this.driver.execute(()=>{
-            window.scroll({top:window.innerHeight,left:0,behavior:"smooth"});
-        })
+            window.scroll({top:document.documentElement.clientHeight,left:0,behavior:"smooth"});
+        })// client height exclude tool bar, and we are comparing screenshot viewport without tool bar
     }
     async takeScreenShot(url:string, browserName:string, savePath:string, wasmEnable:boolean){
         if (!fse.existsSync(savePath)) {

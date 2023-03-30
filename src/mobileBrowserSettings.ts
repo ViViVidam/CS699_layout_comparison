@@ -16,7 +16,7 @@ export function makeSetting(browserName:string,enablewasm:boolean):any {
                         , "javascript.options.wasm_caching": false
                         , "layout.css.devPixelsPerPx" : "1.0"
                         , "browser.viewport.defaultZoom" : 1
-                        , "browser.viewport.desktopWidth" : 1080
+                        , "browser.viewport.desktopWidth" : 1080 // this should be the resolution width of your device
                     }
                 }
             }
