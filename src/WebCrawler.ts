@@ -405,7 +405,6 @@ export class Crawler {
             if (this.currentJob) {
                 this.pagesWithWebAssembly.add(this.currentJob.url);
             }
-
             const wasmBuffer = str2ab(stringBuffer);
             const bufferHashString = await this.hashBuffer(wasmBuffer)
             await fse.outputFile(_resolve(this.finalDomainOutputPath, `${bufferHashString}.wasm`), wasmBuffer);
@@ -808,7 +807,6 @@ export class Crawler {
                 const instrumentationRecords = await this.collectInstrumentationRecordsFromPage(page);
                 clearTimeout(timeout);
                 if(this.alwaysScreenshot){
-                    console.log(1111)
                     await this.takeScreenshot(page);
                 }
 
@@ -823,19 +821,26 @@ export class Crawler {
                         intrumentationRecords: instrumentationRecords
                     };
                     this.containsWebAssembly = true;
-
                     this.pagesWithWebAssembly.add(pageURL);
-
                     try{
                         if(!this.alwaysScreenshot){
-                            console.log(2222)
                             await this.takeScreenshot(page);
                         }
-
-                        if(!this.insertedURLs.has(pageURL)){
+                        /*if(!this.insertedURLs.has(pageURL)){
                             await this.insertInstantiateIntoDatabase(`${pageURL}`, this.domain, instrumentationRecords, currentJob.parent);
-                        }
+                        }*/
                     }catch(takeScreenshotError){
+                        console.log(takeScreenshotError);
+                    }
+                }
+                else if(this.containsWebAssembly){ //if having a wasm file but did not use instantiate method will also take a screenshot
+                    console.log(`${'*'.repeat(10)} Found a WebAssembly module! ${'*'.repeat(10)}`);
+                    try {
+                        if (!this.alwaysScreenshot) {
+                            await this.takeScreenshot(page);
+                        }
+                    }
+                    catch(takeScreenshotError){
                         console.log(takeScreenshotError);
                     }
                 }
