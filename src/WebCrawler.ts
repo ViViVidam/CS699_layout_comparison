@@ -804,12 +804,11 @@ export class Crawler {
                     }
                 }
 
-                console.log(3)
-
                 // await this.scrollToTop(page);
                 const instrumentationRecords = await this.collectInstrumentationRecordsFromPage(page);
                 clearTimeout(timeout);
                 if(this.alwaysScreenshot){
+                    console.log(1111)
                     await this.takeScreenshot(page);
                 }
 
@@ -829,6 +828,7 @@ export class Crawler {
 
                     try{
                         if(!this.alwaysScreenshot){
+                            console.log(2222)
                             await this.takeScreenshot(page);
                         }
 
@@ -881,6 +881,7 @@ export class Crawler {
             await page.waitForTimeout(TIME_TO_WAIT * 1000);
             // await this.scrollToTop(page);
             await this.takeScreenshot(page);
+            console.log(3333)
             await this.closePage(page);
         } catch (browserErr) {
             throw browserErr

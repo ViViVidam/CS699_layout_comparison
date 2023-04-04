@@ -57,7 +57,8 @@ async function crawlSite(urlToScan: string, database: MySQLConnector){
     for(const browser of ['chrome','firefox']){
         console.log(`Scanning with ${browser}: WebAssembly Enabled`)
         await crawler.scanPages(browser);
-        crawler.setAlwaysScreenshot();
+        //
+        // crawler.setAlwaysScreenshot();
         console.log(`Scanning with ${browser}: WebAssembly Disabled`)
         await crawler.screenshotPagesWithWebAssemblyDisabled(browser);
     }
