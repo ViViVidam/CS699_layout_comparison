@@ -1003,18 +1003,31 @@ export class Crawler {
         const firefox = '\\Firefox';
         const disable = '\\WebAssembly_Disabled';
         const enable = '\\WebAssembly_Enabled';
-        const screens = '\\screenshot.jpeg';
-        let chr_en = this.screenshotOutputPath+chrome+enable+screens;
-        let chr_dis = this.screenshotOutputPath+chrome+disable+screens;
-        let fir_en = this.screenshotOutputPath+firefox+enable+screens;
-        let fir_dis = this.screenshotOutputPath+firefox+disable+screens;
-        let diff_path = this.screenshotOutputPath;
+        const screens = '\\screenshot0.png';
+        let chr_en, chr_dis, fir_en, fir_dis, diff_path;
+        if(this.currentJob?.url) {
+            const imageType = ".pdf";
+            const screenshotPath = this.sanitizeURLForFileSystem(this.currentJob?.url, this.screenshotOutputPath) + '.' + imageType;
+            let parentDir = dirname(dirname(dirname(screenshotPath)))
+            console.log("!!!takeScreenshot parentDir",parentDir);
+            chr_en = parentDir+chrome+enable+screens;
+            chr_dis = parentDir+chrome+disable+screens;
+            fir_en = parentDir+firefox+enable+screens;
+            fir_dis = parentDir+firefox+disable+screens;
+            diff_path = parentDir;
+        }else{
+            chr_en = this.screenshotOutputPath+chrome+enable+screens;
+            chr_dis = this.screenshotOutputPath+chrome+disable+screens;
+            fir_en = this.screenshotOutputPath+firefox+enable+screens;
+            fir_dis = this.screenshotOutputPath+firefox+disable+screens;
+            diff_path = this.screenshotOutputPath;
+        }
         let results = [];
         results.push(this.domainReal);
         results.push(await pixelMatchDiff(chr_en,chr_dis,diff_path+"\\chren_chrdis.jpeg"));
         results.push(await pixelMatchDiff(chr_en,fir_en,diff_path+"\\chren_firen.jpeg"));
         results.push(await pixelMatchDiff(fir_en,fir_dis,diff_path+"\\firen_firdis.jpeg"));
-        results.push(await pixelMatchDiff(fir_dis,chr_dis,diff_path+"\\firen_chrdis.jpeg"));
+        results.push(await pixelMatchDiff(chr_dis,fir_dis,diff_path+"\\chrdis_firen.jpeg"));
         return results;
     }
 

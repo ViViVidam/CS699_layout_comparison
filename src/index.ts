@@ -86,7 +86,7 @@ async function getReportPath(){
     }
     let curTime = curYear.concat(strMon, strDate,date.getHours().toString(),date.getMinutes().toString(),'.txt');
     let path = 'Reports/'+curTime;
-    let str = 'url,chren-chrdis,chren-firen,firen-firdis,firdis-chrdis\r';
+    let str = 'url,chren-chrdis,chren-firen,firen-firdis,chrdis-firdis\r';
     fs.writeFile(path,str, {flag:'a+'},err=>{});
     return path;
 }
