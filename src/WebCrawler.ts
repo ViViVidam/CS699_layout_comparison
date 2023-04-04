@@ -436,7 +436,7 @@ export class Crawler {
     async scanPages(browser: string) {
         this.setLaunchOptions(browser, false);
         await this.setup()
-        console.log(this.pagesWithWebAssembly);
+        //console.log(this.pagesWithWebAssembly);
         if(this.pagesWithWebAssembly.size > 0){
             for(const url of this.pagesWithWebAssembly){
                 const job = new QueueJob(url, this.domain, 0);
@@ -502,7 +502,7 @@ export class Crawler {
         }
         await this.teardown();
     }
-    async checkVideoContainer(page: Page,pageURL:string){
+    /*async checkVideoContainer(page: Page,pageURL:string){
         await page.evaluate(()=>{
             let videoElement = document.getElementsByTagName("video");
             if(videoElement.length>0) {
@@ -518,7 +518,7 @@ export class Crawler {
                 console.log(pageURL+" no video found")
             }
         }).catch()
-    }
+    }*/
     async takeScreenshot(page: Page){
         if(this.currentJob?.url) {
             const imageType = ".pdf";
@@ -886,7 +886,7 @@ export class Crawler {
             await page.waitForTimeout(TIME_TO_WAIT * 1000);
             // await this.scrollToTop(page);
             await this.takeScreenshot(page);
-            console.log(3333)
+
             await this.closePage(page);
         } catch (browserErr) {
             throw browserErr

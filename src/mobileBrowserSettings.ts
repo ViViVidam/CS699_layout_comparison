@@ -33,7 +33,7 @@ export function makeSetting(browserName:string,enablewasm:boolean):any {
                     , 'appium:automationName': 'UIAutomator2'
                     , 'appium:browserName': 'Chrome'//'Browser' //Chrome
                     , "appium:chromeOptions": {
-                        args: ['--js-flags=--noexpose_wasm']
+                        args: ['--js-flags=--noexpose_wasm','high-dpi-support=1','force-device-scale-factor=1']
                     }
                 }
             };
@@ -47,6 +47,9 @@ export function makeSetting(browserName:string,enablewasm:boolean):any {
                     , 'appium:deviceName': 'Android Emulator'
                     , 'appium:automationName': 'UIAutomator2'
                     , 'appium:browserName': 'Chrome'//'Browser' //Chrome
+                    , "appium:chromeOptions": {
+                        args: ['high-dpi-support=1','force-device-scale-factor=1']
+                    }
                 }
             };
         }
