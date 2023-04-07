@@ -1029,11 +1029,11 @@ export class Crawler {
             diff_path = this.screenshotOutputPath;
         }
         let results = [];
-        results.push(this.domainReal);
+        results.push(diff_path);
         results.push(await pixelMatchDiff(chr_en,chr_dis,diff_path+"\\chren_chrdis.jpeg"));
         results.push(await pixelMatchDiff(chr_en,fir_en,diff_path+"\\chren_firen.jpeg"));
         results.push(await pixelMatchDiff(fir_en,fir_dis,diff_path+"\\firen_firdis.jpeg"));
-        results.push(await pixelMatchDiff(chr_dis,fir_dis,diff_path+"\\chrdis_firen.jpeg"));
+        results.push(await pixelMatchDiff(chr_dis,fir_dis,diff_path+"\\chrdis_firdis.jpeg"));
         return results;
     }
 
