@@ -18,6 +18,7 @@ export class MobileDriver{
         })// client height exclude tool bar, and we are comparing screenshot viewport without tool bar
     }
     async takeScreenShot(url:string, browserName:string, savePath:string, wasmEnable:boolean){
+        console.log(savePath);
         if (!fse.existsSync(savePath)) {
             fs.mkdirSync(savePath,{recursive:true});
         }

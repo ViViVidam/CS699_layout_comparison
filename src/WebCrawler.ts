@@ -13,7 +13,7 @@ import {makeChromeProfile, makeFirefoxProfileWithWebAssemblyDisabled, makeFirefo
 import {
     promisify
 } from 'util';
-//import wdio = require("webdriverio");
+
 const readdir = promisify(_readdir);
 const mkdir = promisify(_mkdir);
 const stat = promisify(_stat);
@@ -22,7 +22,7 @@ const exists = promisify(_exists);
 const {
     URL
 } = require('url');
-//const wdio = require('webdriverio');
+
 import fse, {outputFile} from 'fs-extra'; // v 5.0.0
 import sanitize from "sanitize-filename";
 import {MySQLConnector} from './MySQLConnector';
@@ -267,15 +267,18 @@ export class Crawler {
     }
 
     sanitizeURLForFileSystem(url: string, outputPath: string){
+
         const responseURLParsed = new URL(url);
         let responsePathname = responseURLParsed.pathname;
+
         const responseBasename = basename(responsePathname);
+
         let responsePath = responsePathname.replace(responseBasename, '');
         const safeBaseName = sanitize(responseBasename).substring(0, 50);
         const safeResponseURL = `${responsePath}/${safeBaseName}`;
+
         let filePath = _resolve(`${outputPath}${safeResponseURL}`);
-        //join(filePath,UsingFirefoxSubDirectoryName,WebAssemblyEnabledSubDirectoryName)
-        //console.log(this.screenshotSubPath)
+
         if (extname(responsePathname).trim() === '') {
             filePath = `${filePath}/${this.screenshotSubPath}/index.html`;
         }
@@ -460,11 +463,11 @@ export class Crawler {
                 if (currentJob != null) {
                     this.currentJob = currentJob
                     const currentURL = currentJob.url;
-                    //console.log("bef scanning")
-                    if(this.scannedSubPages.has(currentURL)){
+                    const santinizeURL = new URL(currentURL);
+                    if(this.scannedSubPages.has(`${santinizeURL.origin}\\${santinizeURL.pathname}`)){
                         continue;
                     } else {
-                        this.scannedSubPages.add(currentURL);
+                        this.scannedSubPages.add(`${santinizeURL.origin}\\${santinizeURL.pathname}`);
                     }
                    // console.log("scanning")
                     this.capturedRequests.clear();
@@ -618,6 +621,12 @@ export class Crawler {
         }
     }
 
+    checkReduntURL(urlstring:string):boolean {
+        let url = new URL(urlstring);
+        let santinizeURL = `${url.origin}\\${url.pathname}`;
+        return !this.scannedSubPages.has(santinizeURL);
+    }
+
     async handleSubURLScan(page: Page,  currentJob: QueueJob){
         if (page != null && page.$ != undefined) {
             const {url,depth} = currentJob; 
@@ -628,7 +637,7 @@ export class Crawler {
                     const upperLimit = urls.length;
                     for (let i = 0; i < upperLimit; i++) {
                         const subURL = urls[i];
-                        if (this.isValidURL(subURL, depth) && this.checkDomain(subURL)) {
+                        if (this.isValidURL(subURL, depth) && this.checkDomain(subURL) && this.checkReduntURL(subURL)) {
                             const nextJob = new QueueJob(subURL, this.domain, depth + 1, `${url}`)
                             this.pagesToVisit.enqueue(nextJob);
                         }
